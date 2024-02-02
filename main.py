@@ -1,5 +1,6 @@
 import requests
 
+
 for i in range(1, 11):
     url = f"https://tululu.org/txt.php?id={i}"
 
