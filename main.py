@@ -1,6 +1,8 @@
 import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
+from pathvalidate import sanitize_filename
+import os
 
 
 def check_for_redirect(response):
@@ -8,8 +10,15 @@ def check_for_redirect(response):
         raise requests.exceptions.HTTPError
 
 
+def download_txt(response, filename, folder='books/'):
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    filename = sanitize_filename(filename)
+    filepath = os.path.join(folder, filename)
+    with open(filepath, 'wb') as file:
+        file.write(response.content)
+
+
 def main():
-    Path("books").mkdir(parents=True, exist_ok=True)
     for i in range(1, 11):
         payload = {
             "id": i
@@ -21,18 +30,17 @@ def main():
             response.raise_for_status()
             check_for_redirect(response)
 
-            filename = f'books/{i}.txt'
-            # with open(filename, 'wb') as file:
-            #     file.write(response.content)
-            url = 'https://tululu.org/b1/'
-            response = requests.get(url)
-            response.raise_for_status()
+            url = f'https://tululu.org/b{i}/'
+            Page = requests.get(url)
+            Page.raise_for_status()
 
-            soup = BeautifulSoup(response.text, 'lxml')
+            soup = BeautifulSoup(Page.text, 'lxml')
             title_tag = soup.find('body').find('table').find('h1')
             title_tag = title_tag.text.split('::')
-            print("Заголовок:", title_tag[0])
-            print("Автор:", title_tag[1].strip())
+
+            name = title_tag[0].strip()
+            filename = f'{i}. {name}.txt'
+            download_txt(response, filename)
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
 
