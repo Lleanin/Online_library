@@ -2,7 +2,9 @@ import requests
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
+from urllib.parse import urljoin
 import os
+from urllib.parse import urlparse
 
 
 def check_for_redirect(response):
@@ -14,6 +16,19 @@ def download_txt(response, filename, folder='books/'):
     Path(folder).mkdir(parents=True, exist_ok=True)
     filename = sanitize_filename(filename)
     filepath = os.path.join(folder, filename)
+    with open(filepath, 'wb') as file:
+        file.write(response.content)
+
+
+def download_image(url, folder='images/'):
+    Path(folder).mkdir(parents=True, exist_ok=True)
+    response = requests.get(url)
+    response.raise_for_status()
+
+    url = urlparse(url)
+    fname = url.path.split("/")[-1]
+    filepath = os.path.join(folder, fname)
+
     with open(filepath, 'wb') as file:
         file.write(response.content)
 
@@ -41,6 +56,11 @@ def main():
             name = title_tag[0].strip()
             filename = f'{i}. {name}.txt'
             download_txt(response, filename)
+
+            photo_book = soup.find(class_='bookimage').find('img')['src']
+            photo_url = urljoin(url, photo_book)
+            download_image(photo_url)
+
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
 
