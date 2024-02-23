@@ -61,6 +61,13 @@ def main():
             photo_url = urljoin(url, photo_book)
             download_image(photo_url)
 
+            comment_block = soup.find_all(class_='texts')
+            comments = []
+            for comment in comment_block:
+                comment = comment.find(class_='black').text
+                comments.append(comment)
+            print(comments)
+
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
 
