@@ -54,6 +54,7 @@ def main():
             title_tag = title_tag.text.split('::')
 
             name = title_tag[0].strip()
+            print('Заголовок:', name)
             filename = f'{i}. {name}.txt'
             download_txt(response, filename)
 
@@ -66,7 +67,14 @@ def main():
             for comment in comment_block:
                 comment = comment.find(class_='black').text
                 comments.append(comment)
-            print(comments)
+
+            genre_block = soup.find_all(class_='d_book')
+            genres = genre_block[1].find_all('a')
+            books_genres = []
+            for genre in genres:
+                genre = genre.text
+                books_genres.append(genre)
+            print(books_genres)
 
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
