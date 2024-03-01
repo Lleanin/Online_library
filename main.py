@@ -1,9 +1,9 @@
 import requests
+import os
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
 from urllib.parse import urljoin
-import os
 from urllib.parse import urlparse
 
 
@@ -33,6 +33,38 @@ def download_image(url, folder='images/'):
         file.write(response.content)
 
 
+def parse_book_page(response, url):
+    soup = BeautifulSoup(response.text, 'lxml')
+    title_tag = soup.find('body').find('table').find('h1')
+    title_tag = title_tag.text.split('::')
+    name = title_tag[0].strip()
+    author = title_tag[1].strip()
+
+    comment_block = soup.find_all(class_='texts')
+    comments = []
+    for comment in comment_block:
+        comment = comment.find(class_='black').text
+        comments.append(comment)
+
+    genre_block = soup.find_all(class_='d_book')
+    genres = genre_block[1].find_all('a')
+    books_genres = []
+    for genre in genres:
+        genre = genre.text
+        books_genres.append(genre)
+
+    book_url = soup.find(class_='bookimage').find('img')['src']
+
+    book_parameters = {
+        "name": name,
+        "author": author,
+        "comments": comments,
+        "genres": books_genres,
+        "book_url": book_url,
+    }
+    return book_parameters
+
+
 def main():
     for i in range(1, 11):
         payload = {
@@ -46,35 +78,15 @@ def main():
             check_for_redirect(response)
 
             url = f'https://tululu.org/b{i}/'
-            Page = requests.get(url)
-            Page.raise_for_status()
+            respone_page = requests.get(url)
+            respone_page.raise_for_status()
 
-            soup = BeautifulSoup(Page.text, 'lxml')
-            title_tag = soup.find('body').find('table').find('h1')
-            title_tag = title_tag.text.split('::')
-
-            name = title_tag[0].strip()
-            print('Заголовок:', name)
-            filename = f'{i}. {name}.txt'
+            book_parameters = parse_book_page(response)
+            filename = f'{i}. {book_parameters["name"]}.txt'
             download_txt(response, filename)
 
-            photo_book = soup.find(class_='bookimage').find('img')['src']
-            photo_url = urljoin(url, photo_book)
+            photo_url = urljoin(url, book_parameters["book_url"])
             download_image(photo_url)
-
-            comment_block = soup.find_all(class_='texts')
-            comments = []
-            for comment in comment_block:
-                comment = comment.find(class_='black').text
-                comments.append(comment)
-
-            genre_block = soup.find_all(class_='d_book')
-            genres = genre_block[1].find_all('a')
-            books_genres = []
-            for genre in genres:
-                genre = genre.text
-                books_genres.append(genre)
-            print(books_genres)
 
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
