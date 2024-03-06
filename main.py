@@ -1,5 +1,6 @@
 import requests
 import os
+import argparse
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
@@ -33,7 +34,7 @@ def download_image(url, folder='images/'):
         file.write(response.content)
 
 
-def parse_book_page(response, url):
+def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
     title_tag = soup.find('body').find('table').find('h1')
     title_tag = title_tag.text.split('::')
@@ -66,7 +67,13 @@ def parse_book_page(response, url):
 
 
 def main():
-    for i in range(1, 11):
+    parser = argparse.ArgumentParser(
+        description='Задает начальное и конечное id скачивания книг'
+    )
+    parser.add_argument('--start_id', help="Начальное id", type=int, default=1)
+    parser.add_argument('--end_id', help="Конечное id", type=int, default=11)
+    args = parser.parse_args()
+    for i in range(args.start_id, args.end_id):
         payload = {
             "id": i
         }
@@ -81,13 +88,14 @@ def main():
             respone_page = requests.get(url)
             respone_page.raise_for_status()
 
-            book_parameters = parse_book_page(response)
+            book_parameters = parse_book_page(respone_page)
             filename = f'{i}. {book_parameters["name"]}.txt'
             download_txt(response, filename)
 
             photo_url = urljoin(url, book_parameters["book_url"])
             download_image(photo_url)
 
+            print(book_parameters)
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
 
