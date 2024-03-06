@@ -70,10 +70,21 @@ def main():
     parser = argparse.ArgumentParser(
         description='Задает начальное и конечное id скачивания книг'
     )
-    parser.add_argument('--start_id', help="Начальное id", type=int, default=1)
-    parser.add_argument('--end_id', help="Конечное id", type=int, default=11)
+    parser.add_argument(
+        '--start_page',
+        help="Начальное id",
+        type=int,
+        default=1
+    )
+    parser.add_argument(
+        '--end_page',
+        help="Конечное id",
+        type=int,
+        default=11
+    )
     args = parser.parse_args()
-    for i in range(args.start_id, args.end_id):
+
+    for i in range(args.start_page, args.end_page):
         payload = {
             "id": i
         }
@@ -95,7 +106,6 @@ def main():
             photo_url = urljoin(url, book_parameters["book_url"])
             download_image(photo_url)
 
-            print(book_parameters)
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
 
