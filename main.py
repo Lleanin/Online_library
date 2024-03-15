@@ -103,6 +103,8 @@ def main():
 
         except requests.exceptions.HTTPError:
             print("Такой страницы не сущетсвует!")
+        except requests.exceptions.ConnectionError:
+            print('Соединение разорвано!')
 
 
 if __name__ == '__main__':
