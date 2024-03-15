@@ -42,17 +42,11 @@ def parse_book_page(response):
     author = title_tag[1].strip()
 
     comment_block = soup.find_all(class_='texts')
-    comments = []
-    for comment in comment_block:
-        comment = comment.find(class_='black').text
-        comments.append(comment)
+    comments = [comment.find(class_='black').text for comment in comment_block]
 
     genre_block = soup.find_all(class_='d_book')
     genres = genre_block[1].find_all('a')
-    books_genres = []
-    for genre in genres:
-        genre = genre.text
-        books_genres.append(genre)
+    books_genres = [genre.text for genre in genres]
 
     book_url = soup.find(class_='bookimage').find('img')['src']
 
@@ -68,7 +62,7 @@ def parse_book_page(response):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Задает начальное и конечное id скачивания книг'
+        description='Данная программа берет книги   сайта tululu.org и скачивает их(текст и картинки книг)'
     )
     parser.add_argument(
         '--start_page',
@@ -84,26 +78,27 @@ def main():
     )
     args = parser.parse_args()
 
-    for i in range(args.start_page, args.end_page):
+    for book_number in range(args.start_page, args.end_page):
         payload = {
-            "id": i
+            "id": book_number
         }
-        url = "https://tululu.org/txt.php?"
+        url = "https://tululu.org/txt.php"
 
         try:
             response = requests.get(url, params=payload)
             response.raise_for_status()
             check_for_redirect(response)
 
-            url = f'https://tululu.org/b{i}/'
-            respone_page = requests.get(url)
-            respone_page.raise_for_status()
+            book_url = f'https://tululu.org/b{book_number}/'
+            page_response = requests.get(url)
+            page_response.raise_for_status()
+            check_for_redirect(page_response)
 
-            book_parameters = parse_book_page(respone_page)
-            filename = f'{i}. {book_parameters["name"]}.txt'
+            book_parameters = parse_book_page(page_response)
+            filename = f'{book_number}. {book_parameters["name"]}.txt'
             download_txt(response, filename)
 
-            photo_url = urljoin(url, book_parameters["book_url"])
+            photo_url = urljoin(book_url, book_parameters["book_url"])
             download_image(photo_url)
 
         except requests.exceptions.HTTPError:
