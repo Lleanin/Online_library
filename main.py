@@ -1,6 +1,7 @@
 import requests
 import os
 import argparse
+import time
 from pathlib import Path
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
@@ -105,6 +106,7 @@ def main():
             print("Такой страницы не сущетсвует!")
         except requests.exceptions.ConnectionError:
             print('Соединение разорвано!')
+            time.sleep(10)
 
 
 if __name__ == '__main__':
