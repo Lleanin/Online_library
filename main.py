@@ -63,7 +63,7 @@ def parse_book_page(response):
 
 def main():
     parser = argparse.ArgumentParser(
-        description='Данная программа берет книги   сайта tululu.org и скачивает их(текст и картинки книг)'
+        description='Данная программа берет книги сайта tululu.org и скачивает их(текст и картинки книг)'
     )
     parser.add_argument(
         '--start_page',
