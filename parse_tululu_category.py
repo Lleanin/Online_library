@@ -19,8 +19,8 @@ def main():
         req.raise_for_status()
         
         soup = BeautifulSoup(req.text, 'lxml')
-        books_block = soup.find_all(class_='d_book')
-        books_nums = [book.find('a')['href'] for book in books_block]
+        books_block = soup.select(".d_book")
+        books_nums = [book.select_one('a')['href'] for book in books_block]
         
         for num in books_nums:
             full_url = urljoin(url_template, num)
@@ -28,7 +28,6 @@ def main():
             page_response = requests.get(full_url)
             page_response.raise_for_status()
             book_parameters = parse_book_page(page_response)
-            
             book_archive.append(book_parameters)
             
             

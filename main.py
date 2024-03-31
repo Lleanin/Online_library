@@ -37,19 +37,19 @@ def download_image(url, folder='images/'):
 
 def parse_book_page(response):
     soup = BeautifulSoup(response.text, 'lxml')
-    title_tag = soup.find('body').find('table').find('h1')
+    title_tag = soup.select_one('h1')
     title_tag = title_tag.text.split('::')
     name = title_tag[0].strip()
     author = title_tag[1].strip()
 
-    comment_block = soup.find_all(class_='texts')
-    comments = [comment.find(class_='black').text for comment in comment_block]
+    comment_block = soup.select(".texts")
+    comments = [comment.select_one(".black").text for comment in comment_block]
 
-    genre_block = soup.find_all(class_='d_book')
-    genres = genre_block[1].find_all('a')
+    genre_block = soup.select(".d_book")
+    genres = genre_block[1].select('a')
     books_genres = [genre.text for genre in genres]
 
-    book_url = soup.find(class_='bookimage').find('img')['src']
+    book_url = soup.select_one(".bookimage img")['src']
 
     book_parameters = {
         "name": name,
