@@ -50,11 +50,10 @@ def main():
                 photo_url = urljoin(page_url, book_parameters["book_url"])
                 download_image(photo_url, args.dest_folder)
 
-    book_archive = json.dumps(book_archive, ensure_ascii=False).encode('utf8')
     Path(args.dest_folder).mkdir(parents=True, exist_ok=True)
     file_path = f"{args.dest_folder}/books.json"
-    with open(file_path, "w") as file:
-        file.write(book_archive.decode())
+    with open(file_path, "w", encoding='utf8') as json_file:
+        json.dump(book_archive, json_file, ensure_ascii=False)
 
 
 if __name__ == '__main__':
