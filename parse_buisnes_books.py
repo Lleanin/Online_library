@@ -71,7 +71,7 @@ def main():
     )
     parser.add_argument('--start_page', help="Начальное id", type=int, default=1)
     parser.add_argument('--end_page', help="Конечное id", type=int, default=11)
-    
+
     args = parser.parse_args()
 
     for book_number in range(args.start_page, args.end_page):
