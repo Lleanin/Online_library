@@ -18,7 +18,6 @@ def main():
     parser.add_argument('--dest_folder', help="Указывает папку в которую будут скачиваться картинки,книги и их параметры", default='Result')
     args = parser.parse_args()
 
-    url_template = 'https://tululu.org/l55/1/'
     book_archive = []
     for page_number in range(args.start_page, args.end_page):
         payload = {
@@ -35,7 +34,7 @@ def main():
         books_ids = [book.select_one('a')['href'] for book in books_block]
 
         for book_id in books_ids:
-            full_url = urljoin(url_template, book_id)
+            full_url = urljoin(page_url, book_id)
 
             page_response = requests.get(full_url)
             page_response.raise_for_status()
