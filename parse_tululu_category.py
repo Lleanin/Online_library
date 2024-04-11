@@ -32,9 +32,9 @@ def main():
 
         soup = BeautifulSoup(request.text, 'lxml')
         books_block = soup.select(".d_book")
-        books_id = [book.select_one('a')['href'] for book in books_block]
+        books_ids = [book.select_one('a')['href'] for book in books_block]
 
-        for book_id in books_id:
+        for book_id in books_ids:
             full_url = urljoin(url_template, book_id)
 
             page_response = requests.get(full_url)
