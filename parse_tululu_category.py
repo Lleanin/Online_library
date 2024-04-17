@@ -34,19 +34,31 @@ def main():
         books_ids = [book.select_one('a')['href'] for book in books_block]
 
         for book_id in books_ids:
+            
             full_url = urljoin(page_url, book_id)
-
+            
             page_response = requests.get(full_url)
             page_response.raise_for_status()
             book_parameters = parse_book_page(page_response)
-            book_archive.append(book_parameters)
+            filename = f'{book_parameters["name"]}.txt'
+            
+            book_url = book_parameters["book_url"].split("/")
+            book_url = f'images/{book_url[2]}'
 
+            photo_url = urljoin(page_url, book_parameters["book_url"])
+            book_archive.append({
+                "name": book_parameters["name"],
+                "author": book_parameters["author"],
+                "img_src": book_url,
+                "book_path": f"books/{filename}",
+                "comments": book_parameters["comments"],
+                "genres": book_parameters["genres"]
+            })
+                
             if not args.skip_txt:
-                filename = f'{book_parameters["name"]}.txt'
                 download_txt(request, filename, args.dest_folder)
 
             if not args.skip_imgs:
-                photo_url = urljoin(page_url, book_parameters["book_url"])
                 download_image(photo_url, args.dest_folder)
 
     Path(args.dest_folder).mkdir(parents=True, exist_ok=True)

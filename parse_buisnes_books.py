@@ -91,6 +91,7 @@ def main():
             check_for_redirect(page_response)
 
             book_parameters = parse_book_page(page_response)
+            print(book_parameters['book_url'])
             filename = f'{book_number}. {book_parameters["name"]}.txt'
             download_txt(response, filename)
 
