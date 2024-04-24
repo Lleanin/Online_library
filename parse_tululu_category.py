@@ -19,29 +19,33 @@ def main():
     args = parser.parse_args()
 
     book_archive = []
+    template_url = "https://tululu.org/txt.php"
+    
     for page_number in range(args.start_page, args.end_page):
-        payload = {
-            "id": page_number
-        }
-
         page_url = f'https://tululu.org/l55/{page_number}/'
 
-        request = requests.get(page_url, params=payload)
-        request.raise_for_status()
+        response = requests.get(page_url)
+        response.raise_for_status()
 
-        soup = BeautifulSoup(request.text, 'lxml')
+        soup = BeautifulSoup(response.text, 'lxml')
         books_block = soup.select(".d_book")
         books_ids = [book.select_one('a')['href'] for book in books_block]
 
         for book_id in books_ids:
-            
+            id = book_id.split("b")[1]
+            payload = {
+                "id": id[:-1]
+            }
+            response = requests.get(template_url, params=payload)
+            response.raise_for_status()
+
             full_url = urljoin(page_url, book_id)
             
             page_response = requests.get(full_url)
             page_response.raise_for_status()
             book_parameters = parse_book_page(page_response)
             filename = f'{book_parameters["name"]}.txt'
-            
+
             book_url = book_parameters["book_url"].split("/")
             book_url = f'images/{book_url[2]}'
 
@@ -56,7 +60,7 @@ def main():
             })
                 
             if not args.skip_txt:
-                download_txt(request, filename, args.dest_folder)
+                download_txt(response, filename, args.dest_folder)
 
             if not args.skip_imgs:
                 download_image(photo_url, args.dest_folder)

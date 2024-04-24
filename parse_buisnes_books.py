@@ -16,6 +16,7 @@ def check_for_redirect(response):
 
 def download_txt(response, filename, result_folder="Result", folder='books/'):
     Path(result_folder).mkdir(parents=True, exist_ok=True)
+
     filename = sanitize_filename(filename)
     dest_folder = f"{result_folder}/{folder}"
     Path(dest_folder).mkdir(parents=True, exist_ok=True)
